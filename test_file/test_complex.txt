@@ -1,0 +1,12 @@
+print("Complex expression test:");
+result = (10 + 5) * 2 - 3;
+print(result);
+
+print("Nested conditions and loops:");
+for(x = 1; x <= 3; x = x + 1) {
+    if(x == 2) {
+        print("Found number 2");
+    } else {
+        print("Not number 2");
+    }
+}

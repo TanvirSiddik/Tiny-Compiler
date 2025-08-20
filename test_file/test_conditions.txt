@@ -1,0 +1,19 @@
+a = 15;
+b = 10;
+print("Conditional test:");
+
+if(a > b) {
+    print("a is greater than b");
+} else {
+    print("a is not greater than b");
+}
+
+if(a == b) {
+    print("a equals b");
+} else {
+    print("a does not equal b");
+}
+
+if(a <= 20) {
+    print("a is less than or equal to 20");
+}
