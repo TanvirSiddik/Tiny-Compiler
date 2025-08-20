@@ -7,7 +7,6 @@ extern int yylex();
 extern FILE* yyin;
 void yyerror(const char* s);
 
-// AST operator constants
 #define AST_PLUS 1
 #define AST_MINUS 2
 #define AST_TIMES 3
@@ -19,7 +18,6 @@ void yyerror(const char* s);
 #define AST_LE 9
 #define AST_GE 10
 
-// Symbol table
 struct symbol {
     char* name;
     double value;
@@ -29,7 +27,6 @@ struct symbol {
 struct symbol symbol_table[MAX_SYMBOLS];
 int symbol_count = 0;
 
-// AST node types
 typedef enum {
     AST_NUMBER,
     AST_IDENTIFIER,
@@ -43,7 +40,6 @@ typedef enum {
     AST_SEQUENCE
 } ASTNodeType;
 
-// AST node structure
 typedef struct ASTNode {
     ASTNodeType type;
     union {
@@ -85,7 +81,6 @@ typedef struct ASTNode {
     } data;
 } ASTNode;
 
-// Safe string duplication
 char* safe_strdup(const char* s) {
     if (!s) return NULL;
     char* result = malloc(strlen(s) + 1);
@@ -97,7 +92,6 @@ char* safe_strdup(const char* s) {
     return result;
 }
 
-// AST creation functions
 ASTNode* create_number_node(double value) {
     ASTNode* node = malloc(sizeof(ASTNode));
     if (!node) {
@@ -223,7 +217,6 @@ ASTNode* create_sequence_node(ASTNode* first, ASTNode* rest) {
     return node;
 }
 
-// Symbol table functions
 int get_symbol_index(const char* name) {
     for (int i = 0; i < symbol_count; i++) {
         if (strcmp(symbol_table[i].name, name) == 0) {
@@ -257,7 +250,6 @@ void set_symbol_value(const char* name, double value) {
     }
 }
 
-// AST evaluation
 double eval_expr(ASTNode* node) {
     if (!node) return 0.0;
     
@@ -316,7 +308,6 @@ double eval_expr(ASTNode* node) {
     }
 }
 
-// AST execution
 void execute_ast(ASTNode* node) {
     if (!node) return;
     
@@ -364,7 +355,6 @@ void execute_ast(ASTNode* node) {
     }
 }
 
-// Memory cleanup
 void free_ast(ASTNode* node) {
     if (!node) return;
     
@@ -439,7 +429,7 @@ ASTNode* program_root = NULL;
 %token IF ELSE FOR PRINT
 %token EQ NEQ LT GT LE GE
 
-%type <ast> program statement assignment_stmt if_statement for_statement expr condition
+%type <ast> program statement assignment_stmt if_statement for_statement expr condition assignment_expr
 
 %left EQ NEQ LT GT LE GE
 %left PLUS MINUS
@@ -467,6 +457,10 @@ assignment_stmt:
     IDENTIFIER ASSIGN expr SEMICOLON        { $$ = create_assignment_node($1, $3); }
     ;
 
+assignment_expr:
+    IDENTIFIER ASSIGN expr                  { $$ = create_assignment_node($1, $3); }
+    ;
+
 if_statement:
     IF LPAREN condition RPAREN LBRACE program RBRACE {
         $$ = create_if_node($3, $6, NULL);
@@ -477,8 +471,8 @@ if_statement:
     ;
 
 for_statement:
-    FOR LPAREN assignment_stmt condition SEMICOLON expr RPAREN LBRACE program RBRACE {
-        $$ = create_for_node($3, $4, $6, $9);
+    FOR LPAREN assignment_expr SEMICOLON condition SEMICOLON assignment_expr RPAREN LBRACE program RBRACE {
+        $$ = create_for_node($3, $5, $7, $10);
     }
     ;
 
@@ -536,7 +530,6 @@ int main(int argc, char** argv) {
         fclose(yyin);
     }
     
-    // Cleanup symbol table
     for (int i = 0; i < symbol_count; i++) {
         free(symbol_table[i].name);
     }
